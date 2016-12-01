@@ -1,8 +1,41 @@
 <!DOCTYPE html5>
 <html>
     <head>
+        <script>
+            "use strict";
+            function init(){
+                // get json and stuff when submit is clicked
+                document.querySelector("#submit").onclick = function(){
+                    var req = new XMLHttpRequest();
+                    req.addEventListener ("load", blogLoad);
+                    req.open("GET", "http://" + window.location.host + "/blog?blog=" + document.querySelector("#blog").value);
+                    req.send();
+                }
+
+                function blogLoad(e){
+                    var results = JSON.parse(e.target.response);
+                    
+                    // create our divs and stuff to select
+                    var resultHTML = document.querySelector("#selection");
+                    for (var i = 0; i < results.length; i++){
+                        var result = results[i];
+                        var html;
+                        html += "<div class='post'>";
+                        html += "<p>" + result.body + "</p>";
+                        html += "</div>";
+                        i = i + 1;
+                        resultHTML.innerHTML += html;
+                        html = undefined;
+                    }
+                }
+            }
+
+            window.onload = init;
+        </script>
     </head>
     <body>
-        <input type="text" placeholder="blog name"></input>
+        <input id="blog" type="text" placeholder="blog name"></input>
+        <div id="submit">submit</div>
+        <div id="selection"></div>
     </body>
 </html>

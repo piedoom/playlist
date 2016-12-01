@@ -28,7 +28,7 @@ var onRequest = function(request, response){
         case ((/^\/blog\?blog\=[.]*/).test(request.url)):
             // get the querystring
             var query = url.parse(request.url, true).query;
-            tclient.blogPosts(query.blog, {type: 'photo'}, function(err, resp) {
+            tclient.blogPosts(query.blog, {type: 'text'}, function(err, resp) {
                 if (resp == null){
                     response.writeHead(404, {"Content-Type": "application/json"});
                     response.write(JSON.stringify({status: 404}));
