@@ -1,6 +1,24 @@
 <!DOCTYPE html5>
 <html>
     <head>
+        <style>
+            .post{
+                border: 1px black solid;
+                border-radius: 2px;
+                float: left;
+                width: 200px;
+                height: 200px;
+                overflow: hidden;
+                box-sizing: border-box;
+                padding: 12px;
+                margin: 12px;
+            }
+
+            .post:hover{
+                box-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+                cursor: pointer;
+            }
+        </style>
         <script>
             "use strict";
             function init(){
@@ -17,15 +35,27 @@
                     
                     // create our divs and stuff to select
                     var resultHTML = document.querySelector("#selection");
+                    resultHTML.innerHTML = "";
+
+                    // loop through our results
                     for (var i = 0; i < results.length; i++){
-                        var result = results[i];
-                        var html;
+
+                        // assign current result
+                        var result;
+                        result = results[i];
+
+                        // initialize our current HTML
+                        var html = "";
+
+                        // begin building post
                         html += "<div class='post'>";
-                        html += "<p>" + result.body + "</p>";
+
+                        // some posts are title only, check for that
+                        console.dir(result);
+                        var body = (result.body == "" ? result.title : result.body);
+                        html += "<p>" + body + "</p>";
                         html += "</div>";
-                        i = i + 1;
                         resultHTML.innerHTML += html;
-                        html = undefined;
                     }
                 }
             }
