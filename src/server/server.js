@@ -33,7 +33,7 @@ var onRequest = function(request, response){
             var query = url.parse(request.url, true).query;
 
             // do everything inside of our query to tumblr
-            tclient.blogPosts(query.blog, {type: 'text'}, function(err, resp) {
+            tclient.blogPosts(query.blog, {type: 'text', limit: 20}, function(err, resp) {
 
                 // if we get a null response, respond with a 404 error
                 if (resp == null){
@@ -64,8 +64,6 @@ var onRequest = function(request, response){
                     }
                 }
 
-                console.dir(finalData);
-
                 response.write(JSON.stringify(finalData));
                 response.end();
             });
@@ -79,7 +77,6 @@ var onRequest = function(request, response){
                 word = words[i];
 
                 // how do i not make this async
-
                 giphy.search({q: word, limit: 1}, function(err, res) {
                     images.push({word: word, order: i, image: res.data[0].images.fixed_height.url});
 

@@ -1,23 +1,84 @@
 <!DOCTYPE html5>
 <html>
     <head>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat|Roboto:300,400" rel="stylesheet">
         <style>
+            body{
+                margin: 0;
+                background: #36465d;
+                font-family: 'Roboto', sans-serif;
+            }
+
             .post{
                 border: 1px black solid;
-                border-radius: 2px;
-                float: left;
+                border-radius: 3px;
+                display: inline-block;
                 width: 200px;
                 height: 200px;
-                overflow: hidden;
+                overflow-y: scroll;
+                overflow-x: hidden;
                 box-sizing: border-box;
                 padding: 12px;
-                margin: 12px;
+                margin: 6px;
+                border-radius: 2px;
+                line-height: 1.5;
+                background: white;
+                color: rgba(0,0,0,0.7);
+                text-align: left;
+            }
+
+            .post::-webkit-scrollbar {
+                width: 0px;  /* remove scrollbar space */
+                background: transparent;  /* optional: just make scrollbar invisible */
+            }
+            /* optional: show position indicator in red */
+            .post::-webkit-scrollbar-thumb {
+                background: #FF0000;
             }
 
             .post:hover{
                 box-shadow: 1px 2px 3px rgba(0,0,0,0.4);
                 cursor: pointer;
             }
+
+            #blog{
+                width: 100%;
+                margin: 0;
+                font-size: 24px;
+                padding: 12px;
+                border: none;
+                background: rgba(0,0,0,.13);
+                outline: none !important;
+                color: white;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            #submit{
+                position: absolute;
+                top: 6px;
+                right: 6px;
+                color: white;
+                font-size: 20px;
+                border: 1px solid white;
+                border-radius: 4px;
+                width: 128px;
+                text-align: center;
+                font-family: 'Montserrat', sans-serif;
+                text-transform: uppercase;
+                line-height: 2;
+            }
+
+            #submit:hover{
+                cursor: pointer;
+                background: white;
+                color: #36465d;
+                border-color: #36465d;
+            }
+
+            #selection{
+                text-align: center;
+            }
+
         </style>
         <script>
             "use strict";
@@ -51,12 +112,24 @@
                         html += "<div class='post'>";
 
                         // some posts are title only, check for that
-                        console.dir(result);
                         var body = (result.body == "" ? result.title : result.body);
                         html += "<p>" + body + "</p>";
                         html += "</div>";
                         resultHTML.innerHTML += html;
                     }
+
+                    // add handlers
+                    var posts = document.querySelectorAll(".post");
+                    for (var i = 0; i < posts.length; i++){
+                        posts[i].onclick = function(e){
+                            postSelect(e.target.innerText);
+                        }
+                    }
+                }
+
+                function postSelect(post){
+                    // do stuff with the text
+                    console.log(post);
                 }
             }
 
