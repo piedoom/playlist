@@ -76,20 +76,23 @@ var onRequest = function(request, response){
             for (var i = 0; i < words.length; i++){
                 word = words[i];
 
-                // how do i not make this async
-                giphy.search({q: word, limit: 1}, function(err, res) {
-                    images.push({word: word, order: i, image: res.data[0].images.fixed_height.url});
-
-                    if (images.length == words.length){
-                        response.write(JSON.stringify(images));
-                        response.end();
-                    }
-                });
+                gifySearch(word, words, response, images, i)
+                
             }
             break;
-    }
-    
+    } 
 };
+
+function gifySearch(word, words, response, images, i){
+    giphy.search({q: word, limit: 1}, function(err, res) {
+        images.push({word: word, order: i, image: res.data[0].images.fixed_height.url});
+
+        if (images.length == words.length){
+            response.write(JSON.stringify(images));
+            response.end();
+        }
+    });
+}
 
 http.createServer(onRequest).listen(port);
 console.log("Listening on localhost:" + port);
