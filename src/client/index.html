@@ -120,6 +120,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
         <script>
             "use strict";
+            (function(){
             var currentIndex = 0;
             var gifs = [];
             var word;
@@ -140,13 +141,25 @@
                 word = document.querySelector("#word");
                 document.querySelector("#submit").onclick = search;
 
+                // check if we already have a searchterm in local storage
+                var searchterm = localStorage.getItem("searchterm");
+                if (searchterm != null){
+                    document.querySelector("#blog").value = searchterm;
+                    search();
+                }
+
                 function search(){
+                    var instructions = document.querySelector("#instructions");
+                    instructions.innerText = "Loading...";
+
+                    var searchterm = document.querySelector("#blog").value;
+                    // store in local storage for later use
+                    localStorage.setItem("searchterm", searchterm)
+
                     var req = new XMLHttpRequest();
                     req.addEventListener ("load", blogLoad);
-                    req.open("GET", "http://" + window.location.host + "/blog?blog=" + document.querySelector("#blog").value);
-                    req.send();
-
-                    
+                    req.open("GET", "http://" + window.location.host + "/blog?blog=" + searchterm);
+                    req.send();                    
                 }
 
                 document.querySelector("#blog").onkeyup = function(e){
@@ -162,11 +175,18 @@
 
                 function blogLoad(e){
 
-                    console.log(e.target.status);
+                    var instructions = document.querySelector("#instructions");
+
+                    // show an error if we get a 404
                     if (e.target.status == 404){
                         $("#blog").animateCss('shake');
+                        document.querySelector("#selection").innerHTML = "";
+                        instructions.innerText = "Not a valid blog name.";
                         return;
                     }
+
+                    
+                    instructions.innerText = "Select a post to Gifiphize";
 
                     var results = JSON.parse(e.target.response);
                     
@@ -211,12 +231,11 @@
                 }
 
                 function gifsLoad(e){
+
+                    // parse the JSON and store the gif object
                     var area = document.querySelector("#gifMovie");
                     var gif = document.querySelector("#gif");
                     gifs = JSON.parse(e.target.response);
-                   // for (var i = 0; i < gifs.length; i++){
-                   //     area.innerHTML += "<video src='" + gifs[i].image + "' autoplay/>";
-                   // }
                     // initialize gif movie
                     currentIndex = 0;
 
@@ -238,6 +257,7 @@
                     gif.play();
                 }
 
+                // change the currently playing gif
                 function changeGif(){
                     if (currentIndex > gifs.length -1) return;
                     gif.src = gifs[currentIndex].image;
@@ -246,17 +266,19 @@
 
                 function postSelect(post){
                     // do stuff with the text
+                    // not used
                 }
             }
 
             window.onload = init;
+            })();
         </script>
     </head>
     <body>
         <input id="blog" type="text" placeholder="blog name"></input>
         <div id="submit">submit</div>
         <div id="content">
-            <h1>Select a post to Gifiphize</h1>
+            <h1 id="instructions" >Type in a blog name to get started.</h1>
             <div id="selection"></div>
             <div id="gifMovie">
                 <video id="gif" style="width: 100%;" ></video>
