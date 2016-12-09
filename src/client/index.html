@@ -2,6 +2,7 @@
 <html>
     <head>
         <link href="https://fonts.googleapis.com/css?family=Montserrat|Roboto:300,400" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
         <style>
             body{
                 margin: 0;
@@ -79,19 +80,94 @@
                 text-align: center;
             }
 
+            #content{
+                margin: 0 auto;
+                max-width: 1100px;
+                width: 100%;
+            }
+
+            h1{
+                color: white;
+                text-transform: uppercase;
+            }
+
+            #gifMovie{
+                position: fixed;
+                height: 100vh;
+                width: 100vw;
+                top: 0;
+                left: 0;
+                background: rgba(0,0,0,0.6);
+                display: none;
+            }
+
+            #word{
+                position: fixed;
+                z-index: 100;
+                color: white;
+                font-size: 48px;
+                left: 50px;
+                top: 20px;
+                display: block;
+                text-shadow: 2px 2px rgba(0,0,0,0.5);
+            }
+
+            #gif{
+                cursor: pointer;
+            }
+
         </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
         <script>
             "use strict";
+            var currentIndex = 0;
+            var gifs = [];
+            var word;
+
             function init(){
+
+                $.fn.extend({
+                    animateCss: function (animationName) {
+                        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+                        this.addClass('animated ' + animationName).one(animationEnd, function() {
+                            $(this).removeClass('animated ' + animationName);
+                        });
+                    }
+                });
+
+
                 // get json and stuff when submit is clicked
-                document.querySelector("#submit").onclick = function(){
+                word = document.querySelector("#word");
+                document.querySelector("#submit").onclick = search;
+
+                function search(){
                     var req = new XMLHttpRequest();
                     req.addEventListener ("load", blogLoad);
                     req.open("GET", "http://" + window.location.host + "/blog?blog=" + document.querySelector("#blog").value);
                     req.send();
+
+                    
                 }
 
+                document.querySelector("#blog").onkeyup = function(e){
+                    if (e.keyCode == 13){
+                        search();
+                    }
+                };
+
+                document.querySelector("#gifMovie").onclick = function(e){
+                    document.querySelector("#gifMovie").style.display = "none";
+                }
+
+
                 function blogLoad(e){
+
+                    console.log(e.target.status);
+                    if (e.target.status == 404){
+                        $("#blog").animateCss('shake');
+                        return;
+                    }
+
                     var results = JSON.parse(e.target.response);
                     
                     // create our divs and stuff to select
@@ -109,7 +185,7 @@
                         var html = "";
 
                         // begin building post
-                        html += "<div class='post'>";
+                        html += "<div class='post animated fadeInUp'>";
 
                         // some posts are title only, check for that
                         var body = (result.body == "" ? result.title : result.body);
@@ -123,13 +199,53 @@
                     for (var i = 0; i < posts.length; i++){
                         posts[i].onclick = function(e){
                             postSelect(e.target.innerText);
+                            $(e.target).animateCss('bounce');
+
+                            // make a request to our server to get gif json
+                            var req = new XMLHttpRequest();
+                            req.addEventListener ("load", gifsLoad);
+                            req.open("GET", "http://" + window.location.host + "/gif?post=" + e.target.innerText);
+                            req.send();
                         }
                     }
                 }
 
+                function gifsLoad(e){
+                    var area = document.querySelector("#gifMovie");
+                    var gif = document.querySelector("#gif");
+                    gifs = JSON.parse(e.target.response);
+                   // for (var i = 0; i < gifs.length; i++){
+                   //     area.innerHTML += "<video src='" + gifs[i].image + "' autoplay/>";
+                   // }
+                    // initialize gif movie
+                    currentIndex = 0;
+
+                    gif.addEventListener('ended', onEnded, false);
+                    gif.addEventListener('canplaythrough', onLoaded, false);
+                    changeGif();
+
+                    document.querySelector("#gifMovie").style.display = "block";
+                }
+
+                function onEnded(e){
+                    currentIndex++;
+                    changeGif();
+                }
+
+                function onLoaded(e){
+                    // speed up video if too long
+                    e.target.playbackRate = e.target.duration / 1.5;
+                    gif.play();
+                }
+
+                function changeGif(){
+                    if (currentIndex > gifs.length -1) return;
+                    gif.src = gifs[currentIndex].image;
+                    word.innerText = gifs[currentIndex].word;
+                }
+
                 function postSelect(post){
                     // do stuff with the text
-                    console.log(post);
                 }
             }
 
@@ -139,6 +255,13 @@
     <body>
         <input id="blog" type="text" placeholder="blog name"></input>
         <div id="submit">submit</div>
-        <div id="selection"></div>
+        <div id="content">
+            <h1>Select a post to Gifiphize</h1>
+            <div id="selection"></div>
+            <div id="gifMovie">
+                <video id="gif" style="width: 100%;" ></video>
+                <h1 id="word"></h1>
+            </div>
+        </div>
     </body>
 </html>

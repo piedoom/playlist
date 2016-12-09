@@ -85,11 +85,31 @@ var onRequest = function(request, response){
 
 function gifySearch(word, words, response, images, i){
     giphy.search({q: word, limit: 1}, function(err, res) {
-        images.push({word: word, order: i, image: res.data[0].images.fixed_height.url});
 
-        if (images.length == words.length){
-            response.write(JSON.stringify(images));
-            response.end();
+        if (res.data[0] != undefined){
+
+            images.push({word: word, order: i, image: res.data[0].images.fixed_width.mp4});
+
+            if (images.length == words.length){
+
+                // send to our client
+
+                // sort everything first
+                images.sort(function(a,b){
+                    var keyA = a.order,
+                    keyB = b.order;
+
+                    if (keyA < keyB) return -1;
+                    if(keyA > keyB) return 1;
+                    return 0;
+                });
+
+                response.write(JSON.stringify(images));
+                response.end();
+            }
+        }
+        else{
+            images.push({word: word, order: i, image: null});
         }
     });
 }
